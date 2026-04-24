@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nico Oropel</title>
+  <meta name="description" content="I build things. Then I find out how badly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Fraunces:ital,wght@0,300;0,700;1,300;1,700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:         #080a0d;
+      --surface:    #0e1117;
+      --border:     #181e28;
+      --border2:    #242d3a;
+      --muted:      #2e3d52;
+      --text:       #b8cce0;
+      --text-dim:   #526070;
+      --text-mid:   #7a92a8;
+      --accent:     #00e5a0;
+      --accent-dim: rgba(0,229,160,0.10);
+      --white:      #eef4fa;
+      --mono:       'JetBrains Mono', monospace;
+      --serif:      'Fraunces', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.50;
+      pointer-events: none; z-index: 0;
+      mask-image: radial-gradient(ellipse 90% 90% at 50% 40%, black 30%, transparent 100%);
+    }
+
+    .scanline {
+      position: fixed; top: -100%; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.07;
+      animation: scan 10s linear infinite;
+      pointer-events: none; z-index: 999;
+    }
+    @keyframes scan { to { top: 110%; } }
+
+    .orb {
+      position: fixed; border-radius: 50%;
+      pointer-events: none; z-index: 0; filter: blur(90px);
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,229,160,0.055) 0%, transparent 70%);
+      top: -150px; right: -150px;
+    }
+    .orb-2 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(0,160,255,0.035) 0%, transparent 70%);
+      bottom: 15%; left: -100px;
+    }
+
+    .section {
+      position: relative; z-index: 1;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 64px 0;
+    }
+
+    .inner {
+      width: 100%;
+      max-width: 660px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    #hero { padding-bottom: 48px; }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.1s ease forwards;
+    }
+
+    h1.hero-name {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(56px, 11vw, 100px);
+      line-height: 0.92;
+      letter-spacing: -0.025em;
+      color: var(--white);
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.2s ease forwards;
+    }
+    h1.hero-name em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-tagline {
+      font-size: clamp(12px, 1.8vw, 14px);
+      color: var(--text-mid);
+      font-style: italic;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.32s ease forwards;
+    }
+    .hero-tagline::before { content: '// '; color: var(--text-dim); font-style: normal; }
+
+    .hero-location {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.42s ease forwards;
+    }
+    .hero-location .pulse {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(0,229,160,0.5);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(0,229,160,0.5); }
+      70%  { box-shadow: 0 0 0 7px rgba(0,229,160,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,229,160,0); }
+    }
+
+    .contact-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.52s ease forwards;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 16px;
+      border: 1px solid var(--border2);
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      background: var(--surface);
+    }
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .contact-link svg {
+      width: 14px; height: 14px;
+      fill: currentColor; flex-shrink: 0;
+    }
+
+    .scroll-hint {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.78s ease forwards;
+    }
+    .scroll-hint-line { width: 20px; height: 1px; background: var(--muted); }
+    .scroll-arrow { animation: bob 2.2s ease-in-out infinite; display: inline-block; }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(5px); }
+    }
+
+    #about {
+      border-top: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .terminal-bar {
+      background: var(--border);
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid var(--border2);
+    }
+    .tdot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .tdot-r { background: #ff5f57; }
+    .tdot-y { background: #febc2e; }
+    .tdot-g { background: var(--accent); }
+    .tfile {
+      margin-left: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .terminal-body { padding: 22px 26px; }
+    .tline { margin-bottom: 3px; }
+    .tp  { color: var(--accent); user-select: none; }
+    .tc  { color: var(--white); }
+    .to  { color: var(--text-dim); line-height: 1.85; }
+    .hi  { color: var(--text); }
+    .cursor {
+      display: inline-block;
+      width: 7px; height: 13px;
+      background: var(--accent);
+      vertical-align: middle;
+      animation: blink 1.1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .trail-card {
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .trail-photo {
+      width: 100%; height: 200px;
+      background: linear-gradient(135deg, var(--border) 0%, var(--surface) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .trail-photo::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 200' preserveAspectRatio='xMidYMax slice'%3E%3Cpolygon points='0,200 120,60 240,130 360,20 480,100 600,40 720,110 800,50 800,200' fill='%23181e28'/%3E%3Cpolygon points='0,200 80,100 200,150 320,70 440,130 560,80 680,140 800,90 800,200' fill='%230e1117' opacity='0.8'/%3E%3C/svg%3E") no-repeat center bottom;
+      background-size: cover;
+    }
+    .trail-photo-placeholder {
+      position: relative; z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .trail-photo img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; z-index: 2;
+    }
+    .trail-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--border2);
+    }
+    .trail-stat {
+      padding: 16px 18px;
+      border-right: 1px solid var(--border2);
+    }
+    .trail-stat:last-child { border-right: none; }
+    .trail-stat-num {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .trail-stat-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .trail-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border2);
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .next-badge {
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,229,160,0.2);
+      color: var(--accent);
+      font-size: 10px;
+      padding: 2px 8px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .interests {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .itag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border: 1px solid var(--border2);
+      color: var(--text-dim);
+      font-size: 12px;
+      background: var(--surface);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .itag:hover { border-color: var(--muted); color: var(--text-mid); }
+
+    footer {
+      position: relative; z-index: 1;
+      padding: 24px 28px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      letter-spacing: 0.06em;
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* ── REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+    .d1 { transition-delay: 0.08s; }
+    .d2 { transition-delay: 0.18s; }
+    .d3 { transition-delay: 0.28s; }
+
+    /* ── KEYFRAMES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      h1.hero-name { font-size: 54px; }
+      .contact-link span { display: none; }
+      .contact-link { padding: 10px 13px; }
+      .trail-stat { padding: 14px 10px; }
+      .trail-stat-num { font-size: 20px; }
+      .inner { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="scanline"></div>
+
+<!-- ══════ HERO ══════ -->
+<section class="section" id="hero">
+  <div class="inner">
+
+    <div class="hero-eyebrow">Security Engineer</div>
+
+    <h1 class="hero-name">Nicolás<br><em>Oropel</em></h1>
+
+    <p class="hero-tagline">I build things. Then I find out how badly.</p>
+
+    <div class="hero-location">
+      <div class="pulse"></div>
+      <span>Mendoza, Argentina</span>
+    </div>
+
+    <div class="contact-row">
+      <!-- Email -->
+      <a class="contact-link" href="mailto:nicoropel84@gmail.com" title="Email">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <span>nicoropel84@gmail.com</span>
+      </a>
+      <!-- LinkedIn -->
+      <a class="contact-link" href="https://linkedin.com/in/noropel" target="_blank" rel="noopener" title="LinkedIn">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        <span>LinkedIn</span>
+      </a>
+      <!-- GitHub -->
+      <a class="contact-link" href="https://github.com/nicooropel" target="_blank" rel="noopener" title="GitHub">
+        <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+
+    <div class="scroll-hint">
+      <div class="scroll-hint-line"></div>
+      <span>Always look further...</span>
+      <span class="scroll-arrow">↓</span>
+    </div>
+
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="inner">
+
+    <div class="section-label reveal">// whoami</div>
+
+    <div class="terminal reveal d1">
+      <div class="terminal-bar">
+        <div class="tdot tdot-r"></div>
+        <div class="tdot tdot-y"></div>
+        <div class="tdot tdot-g"></div>
+        <span class="tfile">stranger@nicooropel.dev.ar ~ whoami</span>
+      </div>
+      <div class="terminal-body">
+        <div class="tline"><span class="tp">❯ </span><span class="tc">cat about.txt</span></div>
+        <br>
+        <div class="tline to hi">stranger</div>
+        <div class="tline to hi">/*</div>
+        <div class="tline to hi">I'm Nico — an application security engineer based in Mendoza, Argentina.</div>
+        <br>
+        <div class="tline to">I started as a Java backend developer. After a few years building APIs</div>
+        <div class="tline to">and integrations — including a stint in fintech — I crossed to the</div>
+        <div class="tline to">other side of the terminal and moved into cybersecurity. Turns out</div>
+        <div class="tline to">understanding how systems are built is a pretty good foundation for</div>
+        <div class="tline to">figuring out how they break.</div>
+        <br>
+        <div class="tline to">Today I work in application security — DevSecOps, security automation,</div>
+        <div class="tline to">SAST/DAST, and a lots of code reading. I care about making security</div>
+        <div class="tline to">something engineering teams actually want to engage with, not something</div>
+        <div class="tline to">that slows them down.</div>
+        <br>
+        <div class="tline to">When I'm not in front of a screen, I'm probably on a mountain.</div>
+        <div class="tline to">I race trail running, love to travel and I also play football.</div>
+        <div class="tline to">I also like music a lot, sometimes I try to play bass and I </div>
+        <div class="tline to"> really enjoy learning stuff I feel connected to.</div>
+        <div class="tline to hi">/*</div>
+        <br>
+        <div class="tline"><span class="tp">❯ </span><span class="cursor"></span></div>
+      </div>
+    </div>
+
+    <div class="trail-card reveal d2">
+      <div class="trail-photo">
+        <!--
+          TO ADD YOUR RACE PHOTO:
+          Replace the div.trail-photo-placeholder below with:
+          <img src="race-photo.jpg" alt="Trail running — Ushuaia 50k" />
+        -->
+        <div class="trail-photo-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(82,96,112,0.6)" stroke-width="1.5"><path d="M3 17l4-8 4 4 3-6 4 10"/></svg>
+          <span style="font-size:10px;color:var(--text-dim)">add race photo here</span>
+        </div>
+      </div>
+      <div class="trail-stats">
+        <div class="trail-stat">
+          <div class="trail-stat-num">541</div>
+          <div class="trail-stat-label">UTMB Index</div>
+        </div>
+        <div class="trail-stat">
+          <div class="trail-stat-num">50k</div>
+          <div class="trail-stat-label">Ushuaia ✓ - Last Finished Race</div>
+        </div>
+      </div>
+      <div class="trail-footer">
+        <span class="next-badge">up next</span>
+        <span>Bella Vista 55k · Patagonia Bariloche by UTMB · Nov 2025</span>
+      </div>
+    </div>
+
+    <div class="interests reveal d3">
+      <div class="itag"><span>⚽</span> Football</div>
+      <div class="itag"><span>🎸</span> Bass</div>
+      <div class="itag"><span>🎹</span> Keys</div>
+      <div class="itag"><span>🎛️</span> Beats</div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <a href="https://nicooropel.dev.ar">nicooropel.dev.ar</a>
+  &nbsp;·&nbsp; no frameworks &nbsp;·&nbsp; Minimalist Set Up
+</footer>
+
+<script src="/script.js"></script>
+
+</body>
+</html>

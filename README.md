@@ -17,6 +17,7 @@ The following were considered and deliberately excluded:
 - **Contact form** — no backend, no form handler, no CSRF surface. Email links only.
 - **Cookies** — none set, none needed. No cookie banner, no session management.
 - **CMS** — no admin panel, no authentication surface, no database. Content lives in version controlled HTML.
+- **Analytics** — Cloudflare Web Analytics was disabled to maintain a strict `connect-src 'none'` policy and eliminate the only remaining third party script dependency.
 
 ## Stack
 
@@ -115,6 +116,7 @@ A `security.txt` file is served at `/.well-known/security.txt` per RFC 9116. It 
 - **Secrets:** none exist in this repository or deployment pipeline
 - **Origin server:** none — Cloudflare Pages serves directly from the edge, eliminating an entire class of server-side vulnerabilities
 - **Email:** Cloudflare Email Routing — inbound only, no mail server, no SMTP credentials
+- **Cloudflare Rocket Loader:** disabled — prevents server-side inline script injection that would require `unsafe-inline` in CSP
 
 
 
@@ -129,6 +131,11 @@ SRI on the Fontshare stylesheet is not applied because Fontshare controls the fi
 ### SRI maintenance overhead
 
 Every deployment that touches `style.css` or `script.js` requires hash regeneration. This is a manual step included in the deploy checklist below.
+
+### Cloudflare-injected scripts
+
+Cloudflare Pages can inject third party scripts server-side (analytics beacon, Rocket Loader) that bypass version control and violate a strict CSP. Both have been explicitly disabled. 
+Any future Cloudflare feature that injects scripts would require a CSP update and should be evaluated before enabling.
 
 
 

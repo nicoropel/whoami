@@ -1,3 +1,6 @@
+/favicon.ico
+  Cache-Control: public, max-age=86400
+  
 /*
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' https://api.fontshare.com; font-src https://api.fontshare.com https://cdn.fontshare.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
 

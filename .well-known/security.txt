@@ -1,0 +1,5 @@
+Contact: security@nicoropel.com
+Expires: 2026-04-25T00:00:00Z
+Preferred-Languages: en, es
+Canonical: https://nicoropel.com/.well-known/security.txt
+Policy: This site is a personal portfolio. If you find a security issue, please disclose it responsibly via the contact above. No bug bounty is offered but all reports are appreciated and will be acknowledged.

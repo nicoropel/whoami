@@ -25,7 +25,7 @@ The following were considered and deliberately excluded:
 - **Cloudflare Pages** — static hosting, global CDN, free tier
 - **Cloudflare Email Routing** — inbound-only custom domain email, no mail server
 - **Cabinet Grotesk via Fontshare** — only external dependency (see known limitations)
-- **GitHub** — source of truth, deploy on push to `main`
+- **GitHub** — source of truth, deploy on push to `main`.No branching strategy applied — single contributor project, all changes are intentional and pushed directly to `main`.
 
 ## Threat Model
 
@@ -38,7 +38,8 @@ This is a static personal site with no backend, no authentication, no user data,
 - **SSL stripping on first visit** — mitigated by HSTS preload list inclusion
 - **MIME confusion attacks** — mitigated by `X-Content-Type-Options: nosniff`
 - **Email harvesting** — accepted risk, contact address is intentionally public
-- **Font supply chain** — accepted risk, documented below
+- **Font supply chain** — accepted risk, see tradeoffs section
+- **DNS hijacking / spoofing** — partially mitigated. DNSSEC signing is enabled at the Cloudflare level (DNSKEY and RRSIG records present). Full chain of trust validation is not possible until the DS record is published at the registrar level. Current registrar (Donweb) does not support DS record publication. Resolved upon transfer to Cloudflare Registrar at next renewal.
 
 
 
@@ -90,7 +91,7 @@ openssl dgst -sha384 -binary script.js | openssl base64 -A
 Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 ```
 
-Two year max-age, subdomains included, submitted to the HSTS preload list. The domain is hardcoded into browsers — HTTPS is enforced before a connection is made, eliminating the first-request SSL stripping window that the header alone cannot protect.
+Two year max-age, subdomains included, already submitted to the HSTS preload list. The domain is hardcoded into browsers — HTTPS is enforced before a connection is made, eliminating the first-request SSL stripping window that the header alone cannot protect.
 
 ### Additional Headers
 
@@ -104,19 +105,18 @@ Two year max-age, subdomains included, submitted to the HSTS preload list. The d
 
 ### security.txt
 
-A `security.txt` file is served at `/.well-known/security.txt` per RFC 9116. It defines a responsible disclosure contact, expiry date, canonical URL, and preferred languages. The file is rotated before the `Expires` field lapses.
+A `security.txt` file is served at `/.well-known/security.txt` per RFC 9116. It defines a responsible disclosure contact, expiry date, canonical URL, and preferred languages. The file should be rotated before the `Expires` field lapses.
 
 
 
 ## Infrastructure
 
-- **DNS:** Cloudflare — DNSSEC signing enabled, DS record pending 
-  publication at registrar (Donweb). Full chain of trust pending 
-  domain transfer to Cloudflare Registrar at next renewal.
+- **DNS:** Cloudflare — DNSSEC signing enabled, ~~DS record pending publication at registrar (Donweb)~~ DS record publication not supported by current registrar (Donweb). DNSKEY and RRSIG records are present and valid — the chain of trust will be completed upon transfer to Cloudflare Registrar at next renewal, where DS record publication is automatic.
 - **Secrets:** none exist in this repository or deployment pipeline
 - **Origin server:** none — Cloudflare Pages serves directly from the edge, eliminating an entire class of server-side vulnerabilities
 - **Email:** Cloudflare Email Routing — inbound only, no mail server, no SMTP credentials
 - **Cloudflare Rocket Loader:** disabled — prevents server-side inline script injection that would require `unsafe-inline` in CSP
+- **_redirects:** repository meta-files (README, .gitignore, _headers) are redirected to the homepage to avoid exposing repo structure via the static file server. `security.txt` is explicitly exempted.
 
 
 
@@ -136,6 +136,37 @@ Every deployment that touches `style.css` or `script.js` requires hash regenerat
 
 Cloudflare Pages can inject third party scripts server-side (analytics beacon, Rocket Loader) that bypass version control and violate a strict CSP. Both have been explicitly disabled. 
 Any future Cloudflare feature that injects scripts would require a CSP update and should be evaluated before enabling.
+
+### File Visibility
+
+Cloudflare Pages serves all repository root files as static assets by default — there is no server-side distinction between application files and configuration files. A `_redirects` rule explicitly blocks direct access to repository meta-files and redirects them to the homepage.
+
+Note: these files remain publicly visible in the GitHub repository by design. This is a public project — the redirects prevent casual enumeration via the static file server, not determined reconnaissance. Security through obscurity is not the goal.
+
+Files intentionally publicly accessible:
+- `index.html` — the site
+- `style.css` — external stylesheet, required by SRI
+- `script.js` — external script, required by SRI
+- `favicon.ico` — browser icon
+- `/.well-known/security.txt` — RFC 9116 compliance
+
+Files blocked from direct access via static server:
+- `_headers` — security configuration
+- `README.md` — repository documentation
+- `.gitignore` — repository configuration
+
+### DNSSEC — incomplete chain of trust
+
+DNSSEC signing is enabled and DNS responses are cryptographically 
+signed. However, the DS record cannot be published at the current 
+registrar (Donweb), meaning resolvers cannot validate the full chain 
+of trust from root to domain. This leaves a theoretical window for 
+DNS spoofing that a complete DNSSEC implementation would close.
+
+Accepted risk — bounded in scope and time. Cloudflare's HTTPS 
+enforcement and HSTS preload provide compensating controls for the 
+most realistic attack scenarios. Full DNSSEC will be completed upon 
+domain transfer to Cloudflare Registrar at next renewal.
 
 
 
